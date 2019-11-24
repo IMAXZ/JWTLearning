@@ -18,6 +18,11 @@ namespace WebAPI.Filters
 
         public async Task<HttpResponseMessage> ExecuteAuthorizationFilterAsync(HttpActionContext actionContext, CancellationToken cancellationToken, Func<Task<HttpResponseMessage>> continuation)
         {
+            //根据AllowAnonymous特性跳过验证
+            if (actionContext.ActionDescriptor.GetCustomAttributes<AllowAnonymousAttribute>(true).Count>0)
+            {
+                return await continuation();
+            }
             if (actionContext.Request.Headers.TryGetValues("token",out IEnumerable<string>headers))
             {
                 var loginName = JwtTools.Decode(headers.FirstOrDefault(), JwtTools.Key)["loginName"].ToString();
